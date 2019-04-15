@@ -58,7 +58,7 @@ app.post('/api/v1/shoe_reading', (req, resu) => {
         let shoe_count = 1;
         let avg = req.body.shoe_size;
 
-        if(res.rows.length>0){
+        if(res.rows && res.rows.length>0){
             shoe_count += res.rows[0].shoe_count;
             const prev_avg = parseFloat(res.rows[0].average);
             avg = prev_avg+((req.body.shoe_size-prev_avg)/shoe_count);
