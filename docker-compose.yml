@@ -1,0 +1,37 @@
+
+version: "3.7"
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: stockx_test
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  web:
+    image: node
+    depends_on:
+      - db
+    volumes:
+      - ./app:/usr/src/app
+      - ./app/node_modules:/usr/src/app/node_modules
+    working_dir: /usr/src/app
+    environment:
+      NODE_ENV: development
+    ports:
+      - 3000:3000
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; npm start'
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - db
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+    volumes:
+      - ./pgadmin:/root/.pgadmin
+    ports:
+      - "80:8080"
