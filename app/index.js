@@ -23,7 +23,8 @@ app.get('/', function (req, res) {
 });
 
 app.post('/api/v1/shoe_reading', (req, resu) => {
-    console.log("Got to post endpoint");
+
+    // Make sure that the post request has the correct values
     if(!req.body.shoe_name) {
         return resu.status(400).send({
             success: 'false',
@@ -41,6 +42,7 @@ app.post('/api/v1/shoe_reading', (req, resu) => {
         });
     }
 
+    // Query to check if a shoe with this name already exists
     let text = 'SELECT * from true_size where shoe_name = $1';
     let values = [req.body.shoe_name];
 
@@ -59,6 +61,9 @@ app.post('/api/v1/shoe_reading', (req, resu) => {
         let avg = req.body.shoe_size;
 
         if(res.rows && res.rows.length>0){
+
+            // If the shoe already exists in the system, we can get the new TrueToSize calculation by the following formula
+            // new_average = prev_avg + ((new_size-prev_avg)/new_count)
             shoe_count += res.rows[0].shoe_count;
             const prev_avg = parseFloat(res.rows[0].average);
             avg = prev_avg+((req.body.shoe_size-prev_avg)/shoe_count);
@@ -67,6 +72,7 @@ app.post('/api/v1/shoe_reading', (req, resu) => {
             values = [avg, shoe_count, req.body.shoe_name];
 
         } else {
+            // If shoe doesn't already exist, we create a new entry
             text = 'INSERT INTO true_size(shoe_name, average, shoe_count) VALUES($1, $2, $3) RETURNING *';
             values = [req.body.shoe_name, req.body.shoe_size, shoe_count];
         }
